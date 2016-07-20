@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <table class="table table-striped table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Limit Name</th>
+            <th>Current Limit</th>
+            <th>Current Usage</th>
+            <th>Percent Used</th>
+        </tr>
+    </thead>
+    {% for limit in limits %}
+    <tbody>
+        <tr>
+            <td>{{ limit['limit_name'] }}</td>
+            <td>{{ limit['current_limit'] }}</td>
+            <td>{{ limit['current_usage'] }}</td>
+            <td>{{ limit['percent_used'] }}</td>
+        </tr>
+    </tbody>
+    {% endfor %}
+    </table>
+{% endblock %}

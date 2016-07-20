@@ -1,0 +1,11 @@
+{
+    "staging": {
+       "s3_bucket": "zappa-testing123",
+       "settings_file": "awslimits/settings.py",
+       "project_name": "AWSlimits",
+       "role_name": "awslimits",
+       "parameter_depth": 2,
+       "http_methods": ["GET", "POST"],
+       "exclude": ["*.git*", "./static/*", "*.DS_Store", "tests/*", "*.zip"]
+    }
+}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <form class="form-horizontal" method="POST" action="#">
+        {{ form.csrf_token }}
+        {{ form.created(hidden=true) }}
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Case ID</label>
+          <div class="col-sm-5">
+            <p class="form-control-static">{{ form.display_id.data }}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Subject</label>
+          <div class="col-sm-5">
+            <p class="form-control-static">{{ form.subject.data }}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Status</label>
+          <div class="col-sm-5">
+            <p class="form-control-static">{{ form.status.data }}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="limit_type">Type</label>
+            <div class="col-sm-5">
+              {{ form.limit_type(class='form-control') }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="limit_value">Limit Value</label>
+            <div class="col-sm-5">
+                {{ form.limit_value(class='form-control') }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-5">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Ticket Communication</label>
+          <div class="col-sm-5">
+            <p class="form-control-static">{{ form.body.data }}</p>
+          </div>
+        </div>
+
+    </form>
+
+
+{% endblock %}
