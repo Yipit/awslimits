@@ -1,3 +1,4 @@
+awslimitchecker
 nose
 git+https://github.com/Miserlou/Zappa
 git+https://github.com/Miserlou/flask-zappa
