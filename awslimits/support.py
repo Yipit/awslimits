@@ -185,20 +185,19 @@ def load_default_limits():
             for limit_name, limit in limit_set.items():
                 limit_name = NAME_SEPARATOR.join([service, limit_name])
 
-                if limit_name not in existing_limit_names:
-                    usage_limits = limit.get_current_usage()
-                    if usage_limits:
-                        current_usage = max(resource.get_value() for resource in usage_limits)
-                    else:
-                        current_usage = 0
-                    batch.put_item(
-                        Item={
-                            'limit_name': limit_name,
-                            'service': service,
-                            'current_limit': limit.get_limit(),
-                            'current_usage': current_usage,
-                        }
-                    )
+                usage_limits = limit.get_current_usage()
+                if usage_limits:
+                    current_usage = max(resource.get_value() for resource in usage_limits)
+                else:
+                    current_usage = 0
+                batch.put_item(
+                    Item={
+                        'limit_name': limit_name,
+                        'service': service,
+                        'current_limit': int(limit.get_limit()),
+                        'current_usage': int(current_usage),
+                    }
+                )
 
 
 def get_tickets_from_aws():
