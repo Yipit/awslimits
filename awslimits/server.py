@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 from forms import TicketForm
 from data_setup import update_data
-from support import get_tickets, get_ticket, update_ticket, get_limits, get_pending_tickets
+from support import get_tickets, get_ticket, update_ticket, get_limits, get_pending_tickets, update_dynamodb_limit_value
 
 app = Flask(__name__)
 app.debug = True
@@ -44,6 +44,13 @@ def individual_ticket(ticket_id):
         return redirect(url_for('pending_tickets'))
 
     return render_template("ticket.html", form=form)
+
+
+@app.route("/limits/<limit_type>", methods=['POST'])
+def update_limit(limit_type):
+    limit_value = request.form['limit_value']
+    update_dynamodb_limit_value(limit_type, limit_value)
+    return redirect(url_for('limits'))
 
 
 @app.route("/refresh")

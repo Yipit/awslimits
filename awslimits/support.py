@@ -117,14 +117,12 @@ def update_ticket(form):
     update_limit_value(limit_type)
 
 def update_limit_value(limit_type):
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-    limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
-
     service, limit_name = limit_type.split(NAME_SEPARATOR)
     checker = AwsLimitChecker(region='us-east-1')
     limits = checker.get_limits()
     default_limit = limits[service][limit_name].default_limit
 
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     tickets_table = dynamodb.Table(TICKETS_TABLE_NAME)
 
     tickets = tickets_table.scan(
@@ -136,24 +134,30 @@ def update_limit_value(limit_type):
         max_value = 0
 
     max_value = max([max_value, default_limit])
+    update_dynamodb_limit_value(limit_type, max_value)
 
+
+def update_dynamodb_limit_value(limit_type, limit_value):
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
     limits_table.update_item(
         Key={
             "limit_name": limit_type,
         },
         AttributeUpdates={
             'current_limit': {
-                'Value': max_value,
+                'Value': limit_value,
                 'Action': 'PUT',
             },
     })
+
 
 def get_limits():
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
     limits = limits_table.scan()['Items']
     for limit in limits:
-        limit['percent_used'] =  str(int(float(limit['current_usage']) / float(limit['current_limit']) * 100)) + '%'
+        limit['percent_used'] = int(float(limit['current_usage']) / float(limit['current_limit']) * 100)
     return limits
 
 
