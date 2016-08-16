@@ -4,6 +4,9 @@ setup:
 	python setup.py develop
 	pip install -r requirements.txt
 
+run:
+	@python awslimits/server.py
+
 test:
 	rm -f .coverage
 	nosetests $(NOSE_ARGS) ./tests/
