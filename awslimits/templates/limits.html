@@ -14,11 +14,31 @@
     <tbody>
         <tr>
             <td>{{ limit['limit_name'] }}</td>
-            <td>{{ limit['current_limit'] }}</td>
+            <td><form action="/limits/{{ limit['limit_name'] }}" method="POST"><input name="limit_value" value="{{ limit['current_limit'] }}" class="readonly-field" /></form></td>
             <td>{{ limit['current_usage'] }}</td>
-            <td>{{ limit['percent_used'] }}</td>
+            <td>{{ limit['percent_used'] }}%</td>
         </tr>
     </tbody>
     {% endfor %}
     </table>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(".readonly-field").on("focus", function() {
+        $(this).removeClass("readonly-field");
+    });
+    $(".readonly-field").on("focusout", function() {
+        $(this).addClass("readonly-field");
+    });
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.readonly-field {
+    border-color: transparent;
+    background: none;
+}
+</style>
 {% endblock %}
