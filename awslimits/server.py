@@ -7,7 +7,7 @@ from support import get_tickets, get_ticket, update_ticket, get_limits, get_pend
 
 app = Flask(__name__)
 app.debug = True
-app.config.from_object("settings")
+app.config.from_object("awslimits.settings")
 
 app.config["APPLICATION_ROOT"] = "/staging"
 
