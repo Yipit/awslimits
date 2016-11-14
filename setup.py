@@ -8,6 +8,7 @@ requires = [
     'Flask-WTF==0.12',
     'python-dateutil',
     'WTForms==2.1',
+    'awslimitchecker',
 ]
 
 setup(
