@@ -16,7 +16,11 @@
             <td>{{ limit['limit_name'] }}</td>
             <td><form action="/limits/{{ limit['limit_name'] }}" method="POST"><input name="limit_value" value="{{ limit['current_limit'] }}" class="readonly-field" /></form></td>
             <td>{{ limit['current_usage'] }}</td>
-            <td>{{ limit['percent_used'] }}%</td>
+            {% if limit['percent_used'] %}
+                <td>{{ limit['percent_used'] }}%</td>
+            {% else %}
+                <td>-</td>
+            {% endif %}
         </tr>
     </tbody>
     {% endfor %}

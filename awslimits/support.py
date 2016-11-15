@@ -157,7 +157,7 @@ def get_limits():
     limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
     limits = limits_table.scan()['Items']
     for limit in limits:
-        limit['percent_used'] = int(float(limit['current_usage']) / float(limit['current_limit']) * 100)
+        limit['percent_used'] = int(float(limit['current_usage']) / float(limit['current_limit']) * 100) if int(limit['current_limit']) else None
     return limits
 
 
