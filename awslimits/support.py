@@ -188,6 +188,12 @@ def load_default_limits():
         for service, limit_set in limits.items():
             for limit_name, limit in limit_set.items():
                 limit_name = NAME_SEPARATOR.join([service, limit_name])
+                if limit_name in existing_limit_names:
+                    current_limit = int(table.query(
+                        KeyConditionExpression=Key('limit_name').eq(limit_name)
+                    )['Items'][0]['current_limit'])
+                else:
+                    current_limit = int(limit.get_limit())
 
                 usage_limits = limit.get_current_usage()
                 if usage_limits:
@@ -198,7 +204,7 @@ def load_default_limits():
                     Item={
                         'limit_name': limit_name,
                         'service': service,
-                        'current_limit': int(limit.get_limit()),
+                        'current_limit': current_limit,
                         'current_usage': int(current_usage),
                     }
                 )
