@@ -3,12 +3,14 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from collections import namedtuple
 import dateutil.parser
+import os
 
 from dynamo_helpers import create_or_get_table
 
 TICKETS_TABLE_NAME = 'awslimits_tickets'
 LIMITS_TABLE_NAME = 'awslimits_limits'
 NAME_SEPARATOR = " :: "
+LIMIT_ALERT_PERCETAGE = os.environ.get('LIMIT_ALERT_PERCETAGE')
 
 
 def dict_to_obj(dict_):
@@ -230,3 +232,17 @@ def get_tickets_from_aws():
             break
 
     return cases
+
+
+def get_limits_for_alert():
+    limits = get_limits()
+    # TODO: only alert about limit types that do not have open tickets
+    return [x for x in limits if x['percent_used'] > LIMIT_ALERT_PERCETAGE]
+
+
+def alert_email_body(limits):
+    body = '<ul>We are using {}% or greater of the following services:'.format(LIMIT_ALERT_PERCETAGE)
+    for limit in limits:
+        body += '<li>{} - {}%</li>'.format(limit['limit_name'], limit['percent_used'])
+    body += '</ul>'
+    return body
