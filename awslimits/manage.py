@@ -4,7 +4,7 @@ from flask_script import Manager
 
 import settings
 from server import app
-from support import get_limits_for_alert, alert_email_body
+from support import get_limits_for_alert, alert_email_body, save_sent_alerts
 
 manager = Manager(app)
 
@@ -35,6 +35,7 @@ def send_alerts():
 			'subject': "AWS Limit Alerts for {}".format(os.environ.get('ROLE_NAME')),
 		}
 		sg.client.mail.send.post(request_body=data)
+		save_sent_alerts(limits_for_alert)
 
 
 if __name__ == "__main__":
