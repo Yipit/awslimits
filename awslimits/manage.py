@@ -2,6 +2,7 @@ import os
 import sendgrid
 from flask_script import Manager
 
+import settings
 from server import app
 from support import get_limits_for_alert, alert_email_body
 
@@ -13,8 +14,8 @@ def send_alerts():
 	limits_for_alert = get_limits_for_alert()
 	if limits_for_alert:
 		content = alert_email_body(limits_for_alert)
-		email_recipients = [{'email': email} for email in os.environ.get('EMAIL_RECIPIENTS').split(',')]
-		sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
+		recipients = [{'email': email} for email in settings.EMAIL_RECIPIENTS.split(',')]
+		sg = sendgrid.SendGridAPIClient(apikey=settings.SENDGRID_API_KEY)
 		data = {
 			'content': [
 				{
@@ -23,12 +24,12 @@ def send_alerts():
 				}
 			],
 			'from': {
-					'email': os.environ.get('FROM_EMAIL_ADDRESS'),
-					'name': os.environ.get('FROM_EMAIL_NAME')
+					'email': settings.FROM_EMAIL_ADDRESS,
+					'name': settings.FROM_EMAIL_NAME
 				},
 			'personalizations': [
 				{
-					'to': email_recipients
+					'to': recipients
 				}
 			],
 			'subject': "AWS Limit Alerts for {}".format(os.environ.get('ROLE_NAME')),
