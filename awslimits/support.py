@@ -3,6 +3,9 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from collections import namedtuple
 import dateutil.parser
+import time
+from datetime import datetime, timedelta
+from decimal import Decimal
 
 import settings
 from dynamo_helpers import create_or_get_table
@@ -11,7 +14,7 @@ TICKETS_TABLE_NAME = 'awslimits_tickets'
 LIMITS_TABLE_NAME = 'awslimits_limits'
 SENT_ALERTS_TABLE_NAME = 'awslimits_sent_alerts'
 NAME_SEPARATOR = " :: "
-LIMIT_ALERT_PERCENTAGE = int(settings.LIMIT_ALERT_PERCENTAGE)
+LIMIT_ALERT_PERCENTAGE = settings.LIMIT_ALERT_PERCENTAGE
 
 
 def dict_to_obj(dict_):
