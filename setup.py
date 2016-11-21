@@ -13,7 +13,7 @@ requires = [
 
 setup(
     name='awslimits',
-    version='0.0.2',
+    version='0.0.3',
     description='Web interface to check your AWS limits',
     author='Steve Pulec',
     author_email='spulec@gmail',
