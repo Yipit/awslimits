@@ -3,12 +3,18 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from collections import namedtuple
 import dateutil.parser
+import time
+from datetime import datetime, timedelta
+from decimal import Decimal
 
+import settings
 from dynamo_helpers import create_or_get_table
 
 TICKETS_TABLE_NAME = 'awslimits_tickets'
 LIMITS_TABLE_NAME = 'awslimits_limits'
+SENT_ALERTS_TABLE_NAME = 'awslimits_sent_alerts'
 NAME_SEPARATOR = " :: "
+LIMIT_ALERT_PERCENTAGE = settings.LIMIT_ALERT_PERCENTAGE
 
 
 def dict_to_obj(dict_):
@@ -230,3 +236,57 @@ def get_tickets_from_aws():
             break
 
     return cases
+
+
+def get_recently_sent_alerts(limits):
+    # Find alerts sent in the last three days
+    table = create_or_get_table(
+        table_name=SENT_ALERTS_TABLE_NAME,
+        attribute_definitions=[
+            {
+                'AttributeName': 'limit_name',
+                'AttributeType': 'S',
+            },
+        ],
+        key_schema=[
+            {
+                'AttributeName': 'limit_name',
+                'KeyType': 'HASH'
+            },
+        ],
+    )
+
+    three_days_ago_ts = Decimal((datetime.utcnow() - timedelta(days=3)).strftime('%s'))
+    alerts = table.scan(
+        FilterExpression=Attr('alert_sent').gt(three_days_ago_ts)
+    )['Items']
+    return [alert['limit_name'] for alert in alerts]
+
+
+def get_limits_for_alert():
+    limits = get_limits()
+    recently_sent_alerts = get_recently_sent_alerts(limits)
+    return [x for x in limits if x['percent_used'] > LIMIT_ALERT_PERCENTAGE and x['limit_name'] not in recently_sent_alerts]
+
+
+def save_sent_alerts(alerts):
+    now_timestamp = time.time()
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    table = dynamodb.Table(SENT_ALERTS_TABLE_NAME)
+    with table.batch_writer() as batch:
+        for alert in alerts:
+            table.put_item(
+                Item={
+                    'limit_name': alert['limit_name'],
+                    'percent_used': alert['percent_used'],
+                    'alert_sent': Decimal(now_timestamp)
+                }
+            )
+
+
+def alert_email_body(limits):
+    body = '<ul>We are using {}% or greater of the following services:'.format(LIMIT_ALERT_PERCENTAGE)
+    for limit in limits:
+        body += '<li>{} - {}%</li>'.format(limit['limit_name'], limit['percent_used'])
+    body += '</ul>'
+    return body
