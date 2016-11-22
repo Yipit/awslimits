@@ -17,7 +17,7 @@
             <td><form action="/limits/{{ limit['limit_name'] }}" method="POST"><input name="limit_value" value="{{ limit['current_limit'] }}" class="readonly-field" /></form></td>
             <td>{{ limit['current_usage'] }}</td>
             {% if limit['current_limit'] %}
-                <td>{{ limit['percent_used'] }}%</td>
+                <td class="percent_used" data-percent-used="{{limit['percent_used']}}">{{ limit['percent_used'] }}%</td>
             {% else %}
                 <td>-</td>
             {% endif %}
@@ -34,6 +34,18 @@
     });
     $(".readonly-field").on("focusout", function() {
         $(this).addClass("readonly-field");
+    });
+    $(document).ready(function(){
+        $(".percent_used").map(function(p) {
+            var percentUsed = $(this).attr('data-percent-used') / 100
+            if (percentUsed >= .90){
+                 $(this).css({'background-color': 'rgba(180, 30, 30, .85)'})
+            } else if (percentUsed >= .75) {
+                $(this).css({'background-color': 'rgba(230, 190, 0, .85)'})
+            } else {
+                $(this).css({'background-color': 'rgba(0, 160, 0, .85)'})
+            }
+        })
     });
 </script>
 {% endblock %}
