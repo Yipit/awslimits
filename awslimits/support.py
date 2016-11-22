@@ -21,6 +21,36 @@ def dict_to_obj(dict_):
     struct = namedtuple('struct', dict_.keys())
     return struct(**dict_)
 
+def get_boto_resource(resource):
+    sts = boto3.client('sts')
+    assumed_role = sts.assume_role(RoleArn=settings.ROLE_ARN, RoleSessionName="awslimits")
+    credentials = assumed_role['Credentials']
+    aws_access_key_id = credentials['AccessKeyId']
+    aws_secret_access_key = credentials['SecretAccessKey']
+    aws_session_token = credentials['SessionToken']
+    return boto3.resource(
+        resource,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
+        region_name=settings.REGION_NAME
+    )
+
+def get_boto_client(client):
+    sts = boto3.client('sts')
+    assumed_role = sts.assume_role(RoleArn=settings.ROLE_ARN, RoleSessionName="awslimits")
+    credentials = assumed_role['Credentials']
+    aws_access_key_id = credentials['AccessKeyId']
+    aws_secret_access_key = credentials['SecretAccessKey']
+    aws_session_token = credentials['SessionToken']
+    return boto3.client(
+        client,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
+        region_name=settings.REGION_NAME
+    )
+
 def load_tickets():
     table = create_or_get_table(
         table_name=TICKETS_TABLE_NAME,
@@ -70,21 +100,21 @@ def load_tickets():
 
 def get_limit_types():
     limit_types = []
-    checker = AwsLimitChecker(region='us-east-1')
+    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
     for service, service_limits in checker.get_limits(use_ta=False).items():
         for service_name, service_limit in service_limits.items():
             limit_types.append(NAME_SEPARATOR.join([service, service_name]))
     return sorted(limit_types)
 
 def get_tickets():
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     table = dynamodb.Table(TICKETS_TABLE_NAME)
     cases = table.scan()['Items']
     cases = sorted(cases, key=lambda case: case['display_id'], reverse=True)
     return cases
 
 def get_ticket(ticket_id):
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     table = dynamodb.Table(TICKETS_TABLE_NAME)
     ticket = table.query(
         KeyConditionExpression=Key('display_id').eq(ticket_id)
@@ -92,7 +122,7 @@ def get_ticket(ticket_id):
     return dict_to_obj(ticket)
 
 def get_pending_tickets():
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     table = dynamodb.Table(TICKETS_TABLE_NAME)
     cases = table.scan(
         FilterExpression=Attr('limit_type').eq('unknown')
@@ -102,7 +132,7 @@ def get_pending_tickets():
 
 
 def update_ticket(form):
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     table = dynamodb.Table(TICKETS_TABLE_NAME)
     limit_type = form.limit_type.data
     table.update_item(
@@ -124,11 +154,11 @@ def update_ticket(form):
 
 def update_limit_value(limit_type):
     service, limit_name = limit_type.split(NAME_SEPARATOR)
-    checker = AwsLimitChecker(region='us-east-1')
+    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
     limits = checker.get_limits()
     default_limit = limits[service][limit_name].default_limit
 
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     tickets_table = dynamodb.Table(TICKETS_TABLE_NAME)
 
     tickets = tickets_table.scan(
@@ -144,7 +174,7 @@ def update_limit_value(limit_type):
 
 
 def update_dynamodb_limit_value(limit_type, limit_value):
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
     limits_table.update_item(
         Key={
@@ -159,7 +189,7 @@ def update_dynamodb_limit_value(limit_type, limit_value):
 
 
 def get_limits():
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
     limits = limits_table.scan()['Items']
     for limit in limits:
@@ -187,10 +217,11 @@ def load_default_limits():
 
     existing_limit_names = [limit['limit_name'] for limit in table.scan()['Items']]
 
-    checker = AwsLimitChecker(region='us-east-1')
+    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
     checker.find_usage()
 
     limits = checker.get_limits()
+
     with table.batch_writer() as batch:
         for service, limit_set in limits.items():
             for limit_name, limit in limit_set.items():
@@ -218,7 +249,7 @@ def load_default_limits():
 
 
 def get_tickets_from_aws():
-    client = boto3.client('support', region_name='us-east-1')
+    client = get_boto_client('support')
 
     cases = []
     next_token = None
@@ -239,7 +270,6 @@ def get_tickets_from_aws():
 
 
 def get_recently_sent_alerts(limits):
-    # Find alerts sent in the last three days
     table = create_or_get_table(
         table_name=SENT_ALERTS_TABLE_NAME,
         attribute_definitions=[
@@ -271,7 +301,7 @@ def get_limits_for_alert():
 
 def save_sent_alerts(alerts):
     now_timestamp = time.time()
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = get_boto_resource('dynamodb')
     table = dynamodb.Table(SENT_ALERTS_TABLE_NAME)
     with table.batch_writer() as batch:
         for alert in alerts:

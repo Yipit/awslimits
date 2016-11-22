@@ -32,7 +32,7 @@ def send_alerts():
 					'to': recipients
 				}
 			],
-			'subject': "AWS Limit Alerts for {}".format(os.environ.get('ROLE_NAME')),
+			'subject': "AWS Limit Alerts for {}".format(settings.ROLE_ARN.split('/')[-1]),
 		}
 		sg.client.mail.send.post(request_body=data)
 		save_sent_alerts(limits_for_alert)

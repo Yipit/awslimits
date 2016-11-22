@@ -6,6 +6,11 @@ APP_OBJECT="app"
 SECRET_KEY = "xC^UHBQO&@^Gj^EICCY0"
 WTF_CSRF_SECRET_KET = SECRET_KEY
 
+ROLE_ARN = os.environ.get("ROLE_ARN")
+REGION_NAME = os.environ.get("REGION_NAME", "us-east-1")
+
+assert ROLE_ARN, "Need to pass a role ARN"
+
 LIMIT_ALERT_PERCENTAGE = int(os.environ.get("LIMIT_ALERT_PERCENTAGE", 90))
 
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
