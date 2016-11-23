@@ -4,6 +4,7 @@ from flask_script import Manager
 
 import settings
 from server import app
+from data_setup import update_data
 from support import get_limits_for_alert, alert_email_body, save_sent_alerts
 
 manager = Manager(app)
@@ -37,6 +38,9 @@ def send_alerts():
 		sg.client.mail.send.post(request_body=data)
 		save_sent_alerts(limits_for_alert)
 
+@manager.command
+def refresh_data():
+	update_data()
 
 if __name__ == "__main__":
     manager.run()
