@@ -2,7 +2,6 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for
 
 from forms import TicketForm
-from data_setup import update_data
 from support import get_tickets, get_ticket, update_ticket, get_limits, get_pending_tickets, update_dynamodb_limit_value
 
 app = Flask(__name__)
