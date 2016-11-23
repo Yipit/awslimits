@@ -53,12 +53,6 @@ def update_limit(limit_type):
     return redirect(url_for('limits'))
 
 
-@app.route("/refresh")
-def refresh_data():
-    update_data()
-    return redirect(url_for('tickets'))
-
-
 @app.context_processor
 def inject_pending_ticket_count():
     tickets = get_pending_tickets()
