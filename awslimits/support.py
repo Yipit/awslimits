@@ -105,7 +105,7 @@ def load_tickets():
 
 def get_limit_types():
     limit_types = []
-    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
+    checker = AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
     for service, service_limits in checker.get_limits(use_ta=False).items():
         for service_name, service_limit in service_limits.items():
             limit_types.append(NAME_SEPARATOR.join([service, service_name]))
@@ -155,7 +155,7 @@ def update_ticket(form):
 
 def update_limit_value(limit_type):
     service, limit_name = limit_type.split(NAME_SEPARATOR)
-    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
+    checker = AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
     limits = checker.get_limits()
     default_limit = limits[service][limit_name].default_limit
 
@@ -220,7 +220,7 @@ def load_default_limits():
 
     existing_limit_names = [limit['limit_name'] for limit in table.scan()['Items']]
 
-    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
+    checker = AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
     checker.find_usage()
 
     limits = checker.get_limits()
