@@ -51,8 +51,12 @@ def get_boto_client(client):
         region_name=settings.REGION_NAME
     )
 
-def load_tickets():
-    table = create_or_get_table(
+
+def get_aws_limit_checker():
+    return AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
+
+def get_tickets_table():
+    return create_or_get_table(
         table_name=TICKETS_TABLE_NAME,
         attribute_definitions=[
             {
@@ -75,6 +79,10 @@ def load_tickets():
             },
         ],
     )
+
+
+def load_tickets():
+    table = get_tickets_table()
 
     current_ticket_ids = set(ticket['display_id'] for ticket in get_tickets())
     with table.batch_writer() as batch:
@@ -100,30 +108,27 @@ def load_tickets():
 
 def get_limit_types():
     limit_types = []
-    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
-    for service, service_limits in checker.get_limits(use_ta=False).items():
+    checker = get_aws_limit_checker()
+    for service, service_limits in checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT).items():
         for service_name, service_limit in service_limits.items():
             limit_types.append(NAME_SEPARATOR.join([service, service_name]))
     return sorted(limit_types)
 
 def get_tickets():
-    dynamodb = get_boto_resource('dynamodb')
-    table = dynamodb.Table(TICKETS_TABLE_NAME)
+    table = get_tickets_table()
     cases = table.scan()['Items']
     cases = sorted(cases, key=lambda case: case['display_id'], reverse=True)
     return cases
 
 def get_ticket(ticket_id):
-    dynamodb = get_boto_resource('dynamodb')
-    table = dynamodb.Table(TICKETS_TABLE_NAME)
+    table = get_tickets_table()
     ticket = table.query(
         KeyConditionExpression=Key('display_id').eq(ticket_id)
     )['Items'][0]
     return dict_to_obj(ticket)
 
 def get_pending_tickets():
-    dynamodb = get_boto_resource('dynamodb')
-    table = dynamodb.Table(TICKETS_TABLE_NAME)
+    table = get_tickets_table()
     cases = table.scan(
         FilterExpression=Attr('limit_type').eq('unknown')
     )['Items']
@@ -132,8 +137,7 @@ def get_pending_tickets():
 
 
 def update_ticket(form):
-    dynamodb = get_boto_resource('dynamodb')
-    table = dynamodb.Table(TICKETS_TABLE_NAME)
+    table = get_tickets_table()
     limit_type = form.limit_type.data
     table.update_item(
         Key={
@@ -154,12 +158,12 @@ def update_ticket(form):
 
 def update_limit_value(limit_type):
     service, limit_name = limit_type.split(NAME_SEPARATOR)
-    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
-    limits = checker.get_limits()
+    checker = get_aws_limit_checker()
+    limits = checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT)
     default_limit = limits[service][limit_name].default_limit
 
     dynamodb = get_boto_resource('dynamodb')
-    tickets_table = dynamodb.Table(TICKETS_TABLE_NAME)
+    tickets_table = get_tickets_table()
 
     tickets = tickets_table.scan(
         FilterExpression=Attr('limit_type').eq(limit_type)
@@ -174,8 +178,7 @@ def update_limit_value(limit_type):
 
 
 def update_dynamodb_limit_value(limit_type, limit_value):
-    dynamodb = get_boto_resource('dynamodb')
-    limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
+    limits_table = get_limits_table()
     limits_table.update_item(
         Key={
             "limit_name": limit_type,
@@ -188,18 +191,8 @@ def update_dynamodb_limit_value(limit_type, limit_value):
     })
 
 
-def get_limits():
-    dynamodb = get_boto_resource('dynamodb')
-    limits_table = dynamodb.Table(LIMITS_TABLE_NAME)
-    limits = limits_table.scan()['Items']
-    for limit in limits:
-        current_limit_float = float(limit['current_limit'])
-        limit['percent_used'] = int(float(limit['current_usage']) / current_limit_float * 100) if current_limit_float else None
-    return limits
-
-
-def load_default_limits():
-    table = create_or_get_table(
+def get_limits_table():
+    return create_or_get_table(
         table_name=LIMITS_TABLE_NAME,
         attribute_definitions=[
             {
@@ -215,12 +208,25 @@ def load_default_limits():
         ],
     )
 
+
+def get_limits():
+    limits_table = get_limits_table()
+    limits = limits_table.scan()['Items']
+    for limit in limits:
+        current_limit_float = float(limit['current_limit'])
+        limit['percent_used'] = int(float(limit['current_usage']) / current_limit_float * 100) if current_limit_float else None
+    return limits
+
+
+def load_default_limits():
+    table = get_limits_table()
+
     existing_limit_names = [limit['limit_name'] for limit in table.scan()['Items']]
 
-    checker = AwsLimitChecker(region=settings.REGION_NAME, account_role=settings.ROLE_ARN)
+    checker = get_aws_limit_checker()
     checker.find_usage()
 
-    limits = checker.get_limits()
+    limits = checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT)
 
     with table.batch_writer() as batch:
         for service, limit_set in limits.items():
