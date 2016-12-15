@@ -106,7 +106,7 @@ def load_tickets():
 def get_limit_types():
     limit_types = []
     checker = AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
-    for service, service_limits in checker.get_limits(use_ta=False).items():
+    for service, service_limits in checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT).items():
         for service_name, service_limit in service_limits.items():
             limit_types.append(NAME_SEPARATOR.join([service, service_name]))
     return sorted(limit_types)
@@ -156,7 +156,7 @@ def update_ticket(form):
 def update_limit_value(limit_type):
     service, limit_name = limit_type.split(NAME_SEPARATOR)
     checker = AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
-    limits = checker.get_limits()
+    limits = checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT)
     default_limit = limits[service][limit_name].default_limit
 
     dynamodb = get_boto_resource('dynamodb')
@@ -223,7 +223,7 @@ def load_default_limits():
     checker = AwsLimitChecker(region=settings.REGION_NAME, account_id=settings.ACCOUNT_ID, account_role=settings.ACCOUNT_ROLE)
     checker.find_usage()
 
-    limits = checker.get_limits()
+    limits = checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT)
 
     with table.batch_writer() as batch:
         for service, limit_set in limits.items():
