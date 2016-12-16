@@ -41,7 +41,7 @@ requires, dependency_links = parse_requirements()
 
 setup(
     name='awslimits',
-    version='1.1.1',
+    version='1.1.2',
     description='Web interface to check your AWS limits',
     author='Steve Pulec',
     author_email='spulec@gmail',
