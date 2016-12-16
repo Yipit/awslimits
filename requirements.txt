@@ -1,6 +1,9 @@
+boto3
+Flask==0.10.1
+Flask-WTF==0.12
+python-dateutil
+WTForms==2.1
 awslimitchecker
 nose
-git+https://github.com/Miserlou/Zappa
-git+https://github.com/Miserlou/flask-zappa
 Flask-Script
 sendgrid
