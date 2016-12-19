@@ -8,7 +8,6 @@ app = Flask(__name__)
 app.debug = True
 app.config.from_object("awslimits.settings")
 
-app.config["APPLICATION_ROOT"] = "/staging"
 
 @app.route("/")
 def limits():
