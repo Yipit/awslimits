@@ -13,10 +13,10 @@ app.config.from_object("awslimits.settings")
 def limits():
     sort_param = request.args.get('sort')
     limits = get_limits()
-    if sort_param == 'percent':
-        limits = sorted(limits, key=lambda limit: limit['percent_used'], reverse=True)
-    else:
+    if sort_param == 'alpha':
         limits = sorted(limits, key=lambda limit: limit['limit_name'])
+    else:
+        limits = sorted(limits, key=lambda limit: limit['percent_used'], reverse=True)
     return render_template('limits.html', limits=limits)
 
 
