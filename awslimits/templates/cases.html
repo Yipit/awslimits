@@ -5,7 +5,7 @@
     {% for ticket in tickets %}
         <li>
             <a href="{{ url_for('individual_ticket', ticket_id=ticket['display_id']) }}">{{ ticket['display_id'] }}</a>
-            ({{ ticket['created']|convert_epoch_time }}): {{ ticket['limit_type'] }} = {{ ticket['limit_value'] }}
+            ({{ ticket['created']|convert_epoch_time }}): {{ ticket['subject'] }} {{ ticket['limit_type'] }} = {{ ticket['limit_value'] }}
         </li>
     {% endfor %}
     </ul>
