@@ -233,11 +233,14 @@ def load_default_limits():
             for limit_name, limit in limit_set.items():
                 limit_name = NAME_SEPARATOR.join([service, limit_name])
                 if limit_name in existing_limit_names:
-                    current_limit = int(table.query(
+                    prev_limit = int(table.query(
                         KeyConditionExpression=Key('limit_name').eq(limit_name)
                     )['Items'][0]['current_limit'])
                 else:
-                    current_limit = int(limit.get_limit())
+                    prev_limit = 0
+
+                # In case we now see a higher value in TrustedAdvisor than our previous
+                current_limit = max(int(limit.get_limit()), prev_limit)
 
                 usage_limits = limit.get_current_usage()
                 if usage_limits:
