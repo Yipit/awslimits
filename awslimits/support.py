@@ -325,7 +325,14 @@ def save_sent_alerts(alerts):
 
 def alert_email_body(limits):
     body = '<ul>We are using {}% or greater of the following services:'.format(LIMIT_ALERT_PERCENTAGE)
+
+    limits = sorted(limits, key=lambda limit: limit['percent_used'], reverse=True)
     for limit in limits:
-        body += '<li>{} - {}%</li>'.format(limit['limit_name'], limit['percent_used'])
+        body += '<li>{name} - {percent}% (using {usage} of {limit})</li>'.format(
+            name=limit['limit_name'],
+            percent=limit['percent_used'],
+            usage=limit['current_usage'],
+            limit=limit['current_limit'],
+        )
     body += '</ul>'
     return body
