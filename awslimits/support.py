@@ -122,7 +122,7 @@ def get_ticket(ticket_id):
 def get_pending_tickets():
     table = get_tickets_table()
     cases = table.scan(
-        FilterExpression=Attr('limit_type').eq('unknown')
+        FilterExpression=Attr('limit_type').eq('unknown') & Attr('body').ne('N/A')
     )['Items']
     cases = sorted(cases, key=lambda case: case['display_id'], reverse=True)
     return cases
