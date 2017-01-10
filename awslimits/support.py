@@ -77,7 +77,6 @@ def load_tickets():
     table = get_tickets_table()
 
     current_ticket_ids = set(ticket['display_id'] for ticket in get_tickets())
-    table = get_tickets_table()
     for ticket in get_tickets_from_aws():
         ticket_id = int(ticket['displayId'])
 
