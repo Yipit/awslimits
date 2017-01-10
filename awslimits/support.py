@@ -77,26 +77,35 @@ def load_tickets():
     table = get_tickets_table()
 
     current_ticket_ids = set(ticket['display_id'] for ticket in get_tickets())
-    with table.batch_writer() as batch:
-        for ticket in get_tickets_from_aws():
-            ticket_id = int(ticket['displayId'])
-            if ticket_id not in current_ticket_ids:
-                separator = '==================================================='
-                aggregated_body = separator.join(communication['body'] for communication in reversed(ticket['recentCommunications']['communications']))
-                if not aggregated_body:
-                    aggregated_body = 'N/A'
-                batch.put_item(
-                    Item={
-                        'display_id': ticket_id,
-                        'case_id': ticket['caseId'],
-                        'created': int(dateutil.parser.parse(ticket['timeCreated']).strftime("%s")),
-                        'subject': ticket['subject'],
-                        'body': aggregated_body,
-                        'status': ticket['status'],
-                        'limit_type': 'unknown',
-                        'limit_value': 0,
-                    }
-                )
+    table = get_tickets_table()
+    for ticket in get_tickets_from_aws():
+        ticket_id = int(ticket['displayId'])
+
+        separator = '===================================================\n'
+        aggregated_body = separator.join(communication['body'] for communication in reversed(ticket['recentCommunications']['communications']))
+
+        ticket_data = {
+                'case_id': ticket['caseId'],
+                'created': int(dateutil.parser.parse(ticket['timeCreated']).strftime("%s")),
+                'subject': ticket['subject'],
+                'status': ticket['status'],
+            }
+
+        if ticket_id not in current_ticket_ids:
+            ticket_data['body'] = aggregated_body or 'N/A'
+            ticket_data['limit_type'] = 'unknown'
+            ticket_data['limit_value'] = 0
+        elif aggregated_body:
+            ticket_data['body'] = aggregated_body
+
+        attribute_updates = dict((k, {'Value': v, 'Action': 'PUT'}) for k,v in ticket_data.items())
+
+        table.update_item(
+            Key={
+                'display_id': ticket_id
+            },
+            AttributeUpdates=attribute_updates
+        )
 
 def get_limit_types():
     limit_types = []
