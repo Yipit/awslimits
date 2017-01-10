@@ -63,19 +63,11 @@ def get_tickets_table():
                 'AttributeName': 'display_id',
                 'AttributeType': 'N',
             },
-            {
-                'AttributeName': 'created',
-                'AttributeType': 'N',
-            },
         ],
         key_schema=[
             {
                 'AttributeName': 'display_id',
                 'KeyType': 'HASH'
-            },
-            {
-                'AttributeName': 'created',
-                'KeyType': 'RANGE'
             },
         ],
     )
@@ -142,7 +134,6 @@ def update_ticket(form):
     table.update_item(
         Key={
             "display_id": form.display_id.data,
-            "created": form.created.data,
         },
         AttributeUpdates={
             'limit_type': {
