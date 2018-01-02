@@ -214,6 +214,10 @@ def get_limits():
     for limit in limits:
         current_limit_float = float(limit['current_limit'])
         limit['percent_used'] = int(float(limit['current_usage']) / current_limit_float * 100) if current_limit_float else None
+        if limit['limit_name'] in settings.SNOOZE:
+            limit['snooze'] = True
+        else:
+            limit['snooze'] = False
     return limits
 
 
@@ -304,7 +308,7 @@ def get_recently_sent_alerts(limits):
 def get_limits_for_alert():
     limits = get_limits()
     recently_sent_alerts = get_recently_sent_alerts(limits)
-    return [x for x in limits if x['percent_used'] > LIMIT_ALERT_PERCENTAGE and x['limit_name'] not in recently_sent_alerts]
+    return [x for x in limits if x['percent_used'] > LIMIT_ALERT_PERCENTAGE and x['limit_name'] not in recently_sent_alerts and not x['snooze']]
 
 
 def save_sent_alerts(alerts):
@@ -335,3 +339,13 @@ def alert_email_body(limits):
         )
     body += '</ul>'
     return body
+
+
+def snooze(limits):
+    '''
+    Add key 'snooze' to certain limits
+    '''
+    for limit in limits:
+        if limit['limit_name'] in settings.SNOOZE:
+            limit['snooze'] = True
+    return limits

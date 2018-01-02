@@ -21,6 +21,9 @@
             {% else %}
                 <td>-</td>
             {% endif %}
+            {% if limit['snooze'] %}
+                <td><i class="fa fa-bell-slash"></i></td>
+            {% endif %}
         </tr>
     </tbody>
     {% endfor %}
