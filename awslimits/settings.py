@@ -23,3 +23,7 @@ FROM_EMAIL_ADDRESS = os.environ.get('FROM_EMAIL_ADDRESS', 'awslimits@alerts.com'
 FROM_EMAIL_NAME = os.environ.get('FROM_EMAIL_NAME')
 
 assert SENDGRID_API_KEY, "Need to pass a SendGrid API key. Create one here: https://app.sendgrid.com/settings/api_keys"
+
+# list of limit names to snooze. Need split because of ::
+# ex: SNOOZE='S3 :: Buckets,VPC :: Subnets per VPC'
+SNOOZE = os.environ.get("SNOOZE").split(',')
