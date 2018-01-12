@@ -339,13 +339,3 @@ def alert_email_body(limits):
         )
     body += '</ul>'
     return body
-
-
-def snooze(limits):
-    '''
-    Add key 'snooze' to certain limits
-    '''
-    for limit in limits:
-        if limit['limit_name'] in settings.SNOOZE:
-            limit['snooze'] = True
-    return limits
