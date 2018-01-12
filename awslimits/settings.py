@@ -26,4 +26,5 @@ assert SENDGRID_API_KEY, "Need to pass a SendGrid API key. Create one here: http
 
 # list of limit names to snooze. Need split because of ::
 # ex: SNOOZE='S3 :: Buckets,VPC :: Subnets per VPC'
-SNOOZE = os.environ.get("SNOOZE").split(',')
+SNOOZE = os.environ.get("SNOOZE", '').replace('\'', '').replace('"', '')
+
