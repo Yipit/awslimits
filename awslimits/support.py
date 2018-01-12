@@ -308,7 +308,7 @@ def get_recently_sent_alerts(limits):
 def get_limits_for_alert():
     limits = get_limits()
     recently_sent_alerts = get_recently_sent_alerts(limits)
-    return [x for x in limits if x['percent_used'] > LIMIT_ALERT_PERCENTAGE and x['limit_name'] not in recently_sent_alerts and not x['snooze']]
+    return [x for x in limits if x['percent_used'] >= LIMIT_ALERT_PERCENTAGE and x['limit_name'] not in recently_sent_alerts and not x['snooze']]
 
 
 def save_sent_alerts(alerts):
