@@ -1,5 +1,5 @@
 boto3
-Flask==0.10.1
+Flask==1.0
 Flask-WTF==0.12
 python-dateutil
 WTForms==2.1
