@@ -28,3 +28,4 @@ assert SENDGRID_API_KEY, "Need to pass a SendGrid API key. Create one here: http
 # ex: SNOOZE='S3 :: Buckets,VPC :: Subnets per VPC'
 SNOOZE = os.environ.get("SNOOZE", '').replace('\'', '').replace('"', '')
 
+SUPPORT_REGION = os.environ.get("SUPPORT_REGION", "us-east-1")

@@ -36,7 +36,7 @@ def get_boto_resource(resource):
         region_name=settings.REGION_NAME
     )
 
-def get_boto_client(client):
+def get_boto_client(client, region_name=settings.REGION_NAME):
     sts = boto3.client('sts')
     assumed_role = sts.assume_role(RoleArn=settings.ROLE_ARN, RoleSessionName="awslimits")
     credentials = assumed_role['Credentials']
@@ -48,7 +48,7 @@ def get_boto_client(client):
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         aws_session_token=aws_session_token,
-        region_name=settings.REGION_NAME
+        region_name=region_name
     )
 
 
@@ -263,7 +263,7 @@ def load_default_limits():
 
 
 def get_tickets_from_aws():
-    client = get_boto_client('support')
+    client = get_boto_client('support', settings.SUPPORT_REGION)
 
     cases = []
     next_token = None
@@ -329,7 +329,7 @@ def save_sent_alerts(alerts):
 
 
 def alert_email_body(limits):
-    body = '<ul>We are using {}% or greater of the following services:'.format(LIMIT_ALERT_PERCENTAGE)
+    body = '<ul>[WARNING] We are approaching the limit for the following services:'
 
     limits = sorted(limits, key=lambda limit: limit['percent_used'], reverse=True)
     for limit in limits:
