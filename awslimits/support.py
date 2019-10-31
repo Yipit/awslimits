@@ -227,7 +227,7 @@ def load_default_limits():
     existing_limit_names = [limit['limit_name'] for limit in table.scan()['Items']]
 
     checker = get_aws_limit_checker()
-    checker.find_usage()
+    checker.find_usage(use_ta=settings.USE_TRUSTED_ADVISOR_FOR_USAGE)
 
     limits = checker.get_limits(use_ta=settings.PREMIUM_ACCOUNT)
 

@@ -29,3 +29,4 @@ assert SENDGRID_API_KEY, "Need to pass a SendGrid API key. Create one here: http
 SNOOZE = os.environ.get("SNOOZE", '').replace('\'', '').replace('"', '')
 
 SUPPORT_REGION = os.environ.get("SUPPORT_REGION", "us-east-1")
+USE_TRUSTED_ADVISOR_FOR_USAGE = int(os.environ.get("USE_TRUSTED_ADVISOR_FOR_USAGE", 1))
