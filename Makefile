@@ -9,7 +9,7 @@ run:
 
 test:
 	rm -f .coverage
-	nosetests $(NOSE_ARGS) ./tests/
+	@pytest
 
 travis:
 	nosetests --with-coverage ./tests/
