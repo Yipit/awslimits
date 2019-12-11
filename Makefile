@@ -8,8 +8,7 @@ run:
 	@python awslimits/server.py
 
 test:
-	rm -f .coverage
-	@pytest
+	@py.test tests/
 
 travis:
 	nosetests --with-coverage ./tests/
