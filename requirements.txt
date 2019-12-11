@@ -7,3 +7,4 @@ awslimitchecker
 nose
 Flask-Script
 sendgrid
+pytest
