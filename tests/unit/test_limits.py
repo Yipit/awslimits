@@ -21,7 +21,7 @@ class TestDynamo(TestCase):
         dynamodb = boto3.client('dynamodb', region_name="us-east-1")
         table_name = 'awslimits_limits'
         initial_table_list = dynamodb.list_tables()
-        assert len(initial_table_list["TableNames"]) == 0
+        assert table_name not in initial_table_list["TableNames"]
         table = create_or_get_table(
             table_name='awslimits_limits',
             attribute_definitions=[
@@ -39,11 +39,46 @@ class TestDynamo(TestCase):
         )
         assert table.name == 'awslimits_limits'
         final_table_list = dynamodb.list_tables()
-        assert len(final_table_list["TableNames"]) == 1
+        assert table_name in final_table_list["TableNames"]
 
 
     def test_create_or_get_exiting_table(self):
-        pass
+        dynamodb = boto3.client('dynamodb', region_name="us-east-1")
+        table_name = 'awslimits_limits1'
+        initial_table_list = dynamodb.list_tables()
+        assert table_name not in initial_table_list["TableNames"]
+        table = create_or_get_table(
+            table_name='awslimits_limits1',
+            attribute_definitions=[
+                {
+                    'AttributeName': 'limit_name',
+                    'AttributeType': 'S',
+                },
+            ],
+            key_schema=[
+                {
+                    'AttributeName': 'limit_name',
+                    'KeyType': 'HASH'
+                },
+            ],
+        )
+        table = create_or_get_table(
+            table_name='awslimits_limits1',
+            attribute_definitions=[
+                {
+                    'AttributeName': 'limit_name',
+                    'AttributeType': 'S',
+                },
+            ],
+            key_schema=[
+                {
+                    'AttributeName': 'limit_name',
+                    'KeyType': 'HASH'
+                },
+            ],
+        )
+        final_table_list = dynamodb.list_tables()
+        assert table_name in final_table_list["TableNames"]
 
     def test_create_or_get_table_exception(self):
         pass
