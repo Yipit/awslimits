@@ -3,9 +3,9 @@ import sendgrid
 from flask_script import Manager
 
 import settings
-from server import app
-from data_setup import update_data
-from support import get_limits_for_alert, alert_email_body, save_sent_alerts
+from .server import app
+from .data_setup import update_data
+from .support import get_limits_for_alert, alert_email_body, save_sent_alerts
 
 manager = Manager(app)
 

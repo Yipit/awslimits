@@ -1,7 +1,7 @@
 from flask_wtf import Form
 from wtforms import StringField, IntegerField, SelectField
 
-from support import get_limit_types
+from .support import get_limit_types
 
 class TicketForm(Form):
     display_id = IntegerField('Display ID')

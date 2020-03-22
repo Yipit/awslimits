@@ -1,4 +1,4 @@
-from support import load_tickets, load_default_limits
+from .support import load_tickets, load_default_limits
 import settings
 
 def update_data():
