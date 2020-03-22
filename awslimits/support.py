@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import settings
-from dynamo_helpers import create_or_get_table
+from .dynamo_helpers import create_or_get_table
 
 TICKETS_TABLE_NAME = 'awslimits_tickets'
 LIMITS_TABLE_NAME = 'awslimits_limits'

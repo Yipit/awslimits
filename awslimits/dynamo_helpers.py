@@ -1,7 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 
-import support
+from . import support
 
 
 def create_or_get_table(table_name, attribute_definitions, key_schema):
