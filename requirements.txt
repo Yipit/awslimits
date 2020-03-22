@@ -1,4 +1,5 @@
 boto3
+gunicorn==20.0.4
 Flask==1.0
 Flask-WTF==0.14.3
 python-dateutil
