@@ -1,6 +1,6 @@
 boto3
 Flask==1.0
-Flask-WTF==0.12
+Flask-WTF==0.14.3
 python-dateutil
 WTForms==2.1
 awslimitchecker
