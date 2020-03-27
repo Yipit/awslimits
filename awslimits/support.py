@@ -1,5 +1,6 @@
 from awslimitchecker.checker import AwsLimitChecker
 import boto3
+from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key, Attr
 from collections import namedtuple
 import dateutil.parser
@@ -8,7 +9,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import settings
-from .dynamo_helpers import create_or_get_table
+
 
 TICKETS_TABLE_NAME = 'awslimits_tickets'
 LIMITS_TABLE_NAME = 'awslimits_limits'
@@ -50,6 +51,30 @@ def get_boto_client(client, region_name=settings.REGION_NAME):
         aws_session_token=aws_session_token,
         region_name=region_name
     )
+
+
+def create_or_get_table(table_name, attribute_definitions, key_schema):
+    dynamodb = get_boto_resource('dynamodb')
+
+    try:
+        table = dynamodb.create_table(
+            AttributeDefinitions=attribute_definitions,
+            TableName=table_name,
+            KeySchema=key_schema,
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 1,
+                'WriteCapacityUnits': 1,
+            },
+        )
+    except ClientError as exc:
+        if exc.response['Error']['Code'] == 'ResourceInUseException':
+            table = dynamodb.Table(table_name)
+            return table
+        else:
+            raise
+
+    table.meta.client.get_waiter('table_exists').wait(TableName=table_name)
+    return table
 
 
 def get_aws_limit_checker():

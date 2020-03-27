@@ -11,3 +11,6 @@ RUN pip install -r /app/requirements.txt
 COPY . /app
 
 WORKDIR /app
+
+EXPOSE 5000
+CMD ["gunicorn", "awslimits.server:app", "--bind", "0.0.0.0:5000"]
