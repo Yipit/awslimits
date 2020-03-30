@@ -51,8 +51,8 @@ def update_limit(limit_type):
     return redirect(url_for('limits'))
 
 
-@app.route("/status")
-def status():
+@app.route("/healthcheck")
+def healthcheck():
     """Healthcheck endpoint for confirming server is responding."""
 
     return Response(status=200)
