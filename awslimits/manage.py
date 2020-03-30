@@ -16,7 +16,7 @@ def send_alerts():
 	if limits_for_alert:
 		content = alert_email_body(limits_for_alert)
 		recipients = [{'email': email} for email in settings.EMAIL_RECIPIENTS.split(',')]
-		sg = sendgrid.SendGridAPIClient(apikey=settings.SENDGRID_API_KEY)
+		sg = sendgrid.SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
 		data = {
 			'content': [
 				{
