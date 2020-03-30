@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, Response
 
 from awslimits.forms import TicketForm
 from awslimits.support import get_tickets, get_ticket, update_ticket, get_limits, get_pending_tickets, update_dynamodb_limit_value
@@ -49,6 +49,13 @@ def update_limit(limit_type):
     limit_value = request.form['limit_value']
     update_dynamodb_limit_value(limit_type, limit_value)
     return redirect(url_for('limits'))
+
+
+@app.route("/status")
+def status():
+    """Healthcheck endpoint for confirming server is responding."""
+
+    return Response(status=200)
 
 
 @app.context_processor
