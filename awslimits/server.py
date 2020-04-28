@@ -55,7 +55,7 @@ def update_limit(limit_type):
 def healthcheck():
     """Healthcheck endpoint for confirming server is responding."""
 
-    return Response(status=200)
+    return Response('it works', status=200)
 
 
 @app.context_processor
