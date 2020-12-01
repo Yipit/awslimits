@@ -41,7 +41,7 @@ requires, dependency_links = parse_requirements()
 
 setup(
     name='awslimits',
-    version='2.3.0',
+    version='2.3.1',
     description='Web interface to check your AWS limits',
     author='Yipit Coders',
     author_email='coders@yipitdata.com',

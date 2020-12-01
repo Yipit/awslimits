@@ -1,3 +1,7 @@
+2.3.1
+-----
+* Pin `awslimitchecker` to 9.0.0
+
 2.3.0
 -----
 * Add healthcheck endpoint at `/healthcheck`
