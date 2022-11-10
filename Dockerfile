@@ -7,6 +7,10 @@ COPY requirements.txt /app/requirements.txt
 
 RUN pip install -r /app/requirements.txt
 
+# Setup global aws config file for boto3 standard mode
+RUN mkdir /root/.aws
+COPY .aws/config /root/.aws/config
+
 # copy everything else after pip install to take advantage of docker image layers (cache)
 COPY . /app
 
